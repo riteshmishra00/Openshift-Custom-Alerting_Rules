@@ -1,5 +1,4 @@
 # Openshift-Custom-Alerting_Rules
-# Policy Collection
 
 A collection of Openshift custom Prometheus alerting_rules policy Management.
 
@@ -21,57 +20,40 @@ Run `kubectl create -f <policy-name.yaml>` to create a "policies" inside openshi
 
 **Note**: By default Openshift is integrated with more than 200+ alerting_rules policies.
 
-### Subscription Administrator
+### Create Custom Openshift Prometheus Alerting_Rules
 
-In new versions of Open Cluster Management you must be a subscription administrator in order to
-deploy policies using a subscription. In these cases the subscription is still successfully created,
-but policy resources are not distributed as expected. You can view the status of the subscription to
-see the subscription errors. If the subscription administrator role is required, a message similar
-to the following one appears for any resource that is not created:
+Create `HostHighCpuLoad` policy for `CPU load is > 50%` for `warning` and `CPU load is > 80%` for `critical alerts`. 'oc apply -f HostHighCpuLoad.yaml':
 
 ```
-        demo-stable-policies-chan-Policy-policy-cert-ocp4:
-          lastUpdateTime: "2021-10-15T20:37:59Z"
-          phase: Failed
-          reason: 'not deployed by a subscription admin. the resource apiVersion: policy.open-cluster-management.io/v1 kind: Policy is not deployed'
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cpu-usage
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: CPUAlerts
+    rules:
+    - alert: HostHighCpuLoad
+      expr: (sum by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total{mode!="idle"}[2m]))) > 0.5) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host high CPU load (instance {{ $labels.instance }})
+        description: "CPU load is > 50%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostHighCpuLoad
+      expr: (sum by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total{mode!="idle"}[2m]))) > 0.8) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: Host high CPU load (instance {{ $labels.instance }})
+        description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 ```
 
 To become a subscription administrator, you must add an entry for your user to the
 `ClusterRoleBinding` named `open-cluster-management:subscription-admin`. A new entry may look like
 the following:
 
-```
-subjects:
-  - kind: User
-    apiGroup: rbac.authorization.k8s.io
-    name: my-username
-```
 
-After updating the `ClusterRoleBinding`, you need to delete the subscription and deploy the subscription again.
-
-### Policy Generator
-
-GitOps through Open Cluster Management is able to handle Kustomize files, so you can also use the
-[Policy Generator](https://github.com/stolostron/policy-generator-plugin) Kustomize plugin to
-generate policies from Kubernetes manifests in your repository. The Policy Generator handles
-Kubernetes manifests as well as policy engine manifests from policy engines like
-[Gatekeeper](https://open-policy-agent.github.io/gatekeeper/) and [Kyverno](https://kyverno.io/).
-
-For additional information about the Policy Generator:
-
-- [Policy Generator product documentation](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.6/html/governance/governance#policy-generator)
-- [Policy Generator source repository documentation](https://github.com/stolostron/policy-generator-plugin/blob/main/README.md)
-- [Policy Generator reference YAML](https://github.com/stolostron/policy-generator-plugin/blob/main/docs/policygenerator-reference.yaml)
-- [Policy Generator examples](policygenerator)
-
-## Community, discussion, contribution, and support
-
-Check the [Contributing policies](CONTRIBUTING.md) document for guidelines on how to contribute to
-the repository.
-
-**Blogs**: Read our blogs that are in the [blogs folder](blogs/README.md).
-
-**Resources**: View the following resources for more information on the components and mechanisms
-are implemented in the product governance framework.
-
-- [Open Cluster Management Quick Start](https://https://open-cluster-management.io/getting-started/quick-start/)
