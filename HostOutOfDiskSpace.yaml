@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: host-disk-usage
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: HostDiskAlerts
+    rules:
+    - alert: HostOutOfDiskSpace
+      expr: ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 50 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host out of disk space (instance {{ $labels.instance }})
+        description: "Disk is almost full (< 50% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostOutOfDiskSpace
+      expr: ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 75 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Host out of disk space (instance {{ $labels.instance }})
+        description: "Disk is almost full (< 75% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
