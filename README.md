@@ -22,7 +22,7 @@ Run `kubectl create -f <policy-name.yaml>` to create a "policies" inside openshi
 
 ### Create Custom Openshift Prometheus Alerting_Rules
 
-Create `HostHighCpuLoad` policy for `CPU load is > 50%` for `warning` and `CPU load is > 80%` for `critical` alerts:
+**1.** Create `HostHighCpuLoad` policy for `CPU load is > 50%` for `warning` and `CPU load is > 80%` for `critical` alerts:
 `oc apply -f HostHighCpuLoad.yaml`
 
 ```
@@ -53,7 +53,7 @@ spec:
         description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 ```
 
-Create `HostOutOfDiskSpace` policy for `Disk is almost full (< 50% left)` for `warning` and `Disk is almost full (< 75% left)` for `critical` alerts:
+**2.** Create `HostOutOfDiskSpace` policy for `Disk is almost full (< 50% left)` for `warning` and `Disk is almost full (< 75% left)` for `critical` alerts:
 `oc apply -f HostOutOfDiskSpace.yaml`
 
 ```
@@ -84,7 +84,7 @@ spec:
         description: "Disk is almost full (< 75% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 ```
 
-Create `HostOutOfMemory` policy for `Node memory is filling up (< 30% left)` for `warning` and `Node memory is filling up (< 15% left)` for `critical` alerts:
+**3.** Create `HostOutOfMemory` policy for `Node memory is filling up (< 30% left)` for `warning` and `Node memory is filling up (< 15% left)` for `critical` alerts:
 `oc apply -f HostOutOfMemory.yaml`
 
 ```
@@ -115,7 +115,7 @@ spec:
         description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 ```
 
-Create `HostSwapIsFillingUp` policy for `Swap is filling up (>70%)` for `warning` and `Swap is filling up (>80%)` for `critical` alerts:
+**4.** Create `HostSwapIsFillingUp` policy for `Swap is filling up (>70%)` for `warning` and `Swap is filling up (>80%)` for `critical` alerts:
 `oc apply -f HostSwapIsFillingUp.yaml`
 
 ```
